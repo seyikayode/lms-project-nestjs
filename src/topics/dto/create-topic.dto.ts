@@ -28,6 +28,5 @@ export class CreateTopicDto {
 
     @IsNumber()
     @Min(0)
-    @IsOptional()
-    order?: number = 0;
+    order: number = 0;
 }

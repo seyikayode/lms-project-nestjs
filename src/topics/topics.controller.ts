@@ -1,34 +1,55 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Request } from '@nestjs/common';
 import { TopicsService } from './topics.service';
 import { CreateTopicDto } from './dto/create-topic.dto';
 import { UpdateTopicDto } from './dto/update-topic.dto';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { RolesGuard } from 'src/auth/guards/roles.guard';
+import { Roles } from 'src/common/decorators/roles.decorator';
+import { UserRole } from 'src/common/enums/user-role.enum';
 
-@Controller('topics')
+@Controller('courses/:courseId/topics')
 export class TopicsController {
   constructor(private readonly topicsService: TopicsService) {}
 
   @Post()
-  create(@Body() createTopicDto: CreateTopicDto) {
-    return this.topicsService.create(createTopicDto);
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.TUTOR)
+  create(
+    @Param('courseId') courseId: string,
+    @Body() createTopicDto: CreateTopicDto,
+    @Request() req
+  ) {
+    return this.topicsService.create(courseId, createTopicDto, req.user);
   }
 
   @Get()
-  findAll() {
-    return this.topicsService.findAll();
+  findByCourse(@Param('courseId') courseId: string) {
+    return this.topicsService.findByCourse(courseId);
   }
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.topicsService.findOne(+id);
+    return this.topicsService.findOne(id);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateTopicDto: UpdateTopicDto) {
-    return this.topicsService.update(+id, updateTopicDto);
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.TUTOR, UserRole.ADMIN)
+  update(
+    @Param('id') id: string,
+    @Body() updateTopicDto: UpdateTopicDto,
+    @Request() req
+  ) {
+    return this.topicsService.update(id, updateTopicDto, req.user);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.topicsService.remove(+id);
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.TUTOR, UserRole.ADMIN)
+  remove(
+    @Param('id') id: string,
+    @Request() req
+  ) {
+    return this.topicsService.remove(id, req.user);
   }
 }
