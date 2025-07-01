@@ -5,15 +5,15 @@ import { IsNumber, IsOptional, IsString, Min } from 'class-validator';
 export class UpdateTopicDto extends PartialType(CreateTopicDto) {
     @IsString()
     @IsOptional()
-    title: string;
+    title?: string;
 
     @IsString()
     @IsOptional()
-    content: string;
+    content?: string;
 
     @IsString()
     @IsOptional()
-    description: string;
+    description?: string;
 
     @IsNumber()
     @Min(0)
